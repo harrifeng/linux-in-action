@@ -1,0 +1,116 @@
+* netstat详解
+** 列出所有的连接,这个是最简单的,使用-a就可以. 这个包括tcp,udp,和unix domain socket
+   #+begin_src shell
+     $ netstat -a
+     Active Internet connections (servers and established)
+     Proto Recv-Q Send-Q Local Address           Foreign Address         State
+     tcp        0      0 0.0.0.0:mysql           0.0.0.0:*               LISTEN
+     tcp        0      0 0.0.0.0:us-cli          0.0.0.0:*               LISTEN
+     tcp        0      0 0.0.0.0:ssh             0.0.0.0:*               LISTEN
+     tcp        0      0 localhost:32000         0.0.0.0:*               LISTEN
+     tcp        0      0 0.0.0.0:zabbix-agent    0.0.0.0:*               LISTEN
+     tcp        0      0 localhost:33248         localhost:mysql         TIME_WAIT
+     tcp        0      0 localhost:33378         localhost:mysql         TIME_WAIT
+     tcp        0      0 localhost:33322         localhost:mysql         TIME_WAIT
+     udp        0      0 0.0.0.0:21470           0.0.0.0:*
+     udp        0      0 0.0.0.0:bootpc          0.0.0.0:*
+     udp        0      0 localhost:ntp           0.0.0.0:*
+     udp        0      0 0.0.0.0:ntp             0.0.0.0:*
+     udp6       0      0 [::]:7079               [::]:*
+     udp6       0      0 [::]:ntp                [::]:*
+     Active UNIX domain sockets (servers and established)
+     Proto RefCnt Flags       Type       State         I-Node   Path
+     unix  2      [ ACC ]     STREAM     LISTENING     19970    /var/run/nscd/socket
+     unix  2      [ ACC ]     STREAM     LISTENING     10498    /run/systemd/journal/stdout
+     unix  6      [ ]         DGRAM                    10501    /run/systemd/journal/socket
+     unix  12     [ ]         DGRAM                    10503    /dev/log
+   #+end_src
+** 只列出tcp或者udp,就是加上参数-t或者-u
+   #+begin_src shell
+     $ netstat -at
+     Active Internet connections (servers and established)
+     Proto Recv-Q Send-Q Local Address           Foreign Address         State
+     tcp        0      0 0.0.0.0:mysql           0.0.0.0:*               LISTEN
+     tcp        0      0 0.0.0.0:us-cli          0.0.0.0:*               LISTEN
+     tcp        0      0 0.0.0.0:ssh             0.0.0.0:*               LISTEN
+     tcp        0      0 localhost:32000         0.0.0.0:*               LISTEN
+     tcp        0      0 0.0.0.0:zabbix-agent    0.0.0.0:*               LISTEN
+     tcp        0      0 localhost:34208         localhost:mysql         TIME_WAIT
+     tcp        0      0 localhost:34260         localhost:mysql         TIME_WAIT
+     tcp       32      0 bjd-qtt-rec-airfl:46102 100.100.18.22:squid     CLOSE_WAIT
+     tcp        0      0 localhost:34150         localhost:mysql         TIME_WAIT
+     tcp        0      0 bjd-qtt-rec-airfl:43352 172.16.52.75:ssh        ESTABLISHED
+     tcp        0      0 localhost:34290         localhost:mysql         TIME_WAIT
+     tcp        0      0 localhost:34170         localhost:mysql         TIME_WAIT
+     tcp6       0      0 [::]:zabbix-agent       [::]:*                  LISTEN
+     [08:04:51] airflow@ 002-netstat (master) $ netstat -au
+     Active Internet connections (servers and established)
+     Proto Recv-Q Send-Q Local Address           Foreign Address         State
+     udp        0      0 0.0.0.0:21470           0.0.0.0:*
+     udp        0      0 0.0.0.0:bootpc          0.0.0.0:*
+     udp        0      0 bjd-qtt-rec-airflow:ntp 0.0.0.0:*
+     udp        0      0 bjd-qtt-rec-airflow:ntp 0.0.0.0:*
+     udp        0      0 bjd-qtt-rec-airflow:ntp 0.0.0.0:*
+     udp        0      0 bjd-qtt-rec-airflow:ntp 0.0.0.0:*
+     udp        0      0 bjd-qtt-rec-airflow:ntp 0.0.0.0:*
+     udp        0      0 localhost:ntp           0.0.0.0:*
+     udp        0      0 0.0.0.0:ntp             0.0.0.0:*
+     udp6       0      0 [::]:7079               [::]:*
+     udp6       0      0 [::]:ntp                [::]:*
+   #+end_src
+** 只需要知道IP不需要hostname,加上参数-n
+   #+begin_src shell
+     $ netstat -atn
+     Active Internet connections (servers and established)
+     Proto Recv-Q Send-Q Local Address           Foreign Address         State
+     tcp        0      0 0.0.0.0:3306            0.0.0.0:*               LISTEN
+     tcp        0      0 0.0.0.0:8082            0.0.0.0:*               LISTEN
+     tcp        0      0 0.0.0.0:22              0.0.0.0:*               LISTEN
+     tcp        0      0 127.0.0.1:32000         0.0.0.0:*               LISTEN
+     tcp        0      0 0.0.0.0:10050           0.0.0.0:*               LISTEN
+     tcp        0      0 127.0.0.1:36338         127.0.0.1:3306          TIME_WAIT
+     tcp        0      0 127.0.0.1:36314         127.0.0.1:3306          TIME_WAIT
+   #+end_src
+** 只列出在监听(Listening)状态的连接.需要-l,并且不能有-a
+   #+begin_src shell
+     $ netstat -tnl
+     Active Internet connections (only servers)
+     Proto Recv-Q Send-Q Local Address           Foreign Address         State
+     tcp        0      0 0.0.0.0:3306            0.0.0.0:*               LISTEN
+     tcp        0      0 0.0.0.0:8082            0.0.0.0:*               LISTEN
+     tcp        0      0 0.0.0.0:22              0.0.0.0:*               LISTEN
+     tcp        0      0 127.0.0.1:32000         0.0.0.0:*               LISTEN
+     tcp        0      0 0.0.0.0:10050           0.0.0.0:*               LISTEN
+     tcp6       0      0 :::10050                :::*                    LISTEN
+   #+end_src
+** 要列出连接对应的进程名和进程ID,需要-p. 这个需要root权限,否则看不到.我们还可以
+   加上-e来看进程的拥有者(-e和-n一起用也不行,会把用户的ID输出,而不是username)
+   #+begin_src shell
+     $ sudo netstat -ltnp
+     Active Internet connections (only servers)
+     Proto Recv-Q Send-Q Local Address           Foreign Address         State       PID/Program name
+     tcp        0      0 0.0.0.0:3306            0.0.0.0:*               LISTEN      1399/mysqld
+     tcp        0      0 0.0.0.0:8082            0.0.0.0:*               LISTEN      2108/gunicorn: mast
+     tcp        0      0 0.0.0.0:22              0.0.0.0:*               LISTEN      1088/sshd
+     tcp        0      0 127.0.0.1:32000         0.0.0.0:*               LISTEN      1406/java
+     tcp        0      0 0.0.0.0:10050           0.0.0.0:*               LISTEN      1087/zabbix_agentd
+     tcp6       0      0 :::10050                :::*                    LISTEN      1087/zabbix_agentd
+     [08:27:44] airflow@ 002-netstat (master) $ sudo netstat -ltep
+     Active Internet connections (only servers)
+     Proto Recv-Q Send-Q Local Address           Foreign Address         State       User       Inode      PID/Program name
+     tcp        0      0 0.0.0.0:mysql           0.0.0.0:*               LISTEN      mysql      24236      1399/mysqld
+     tcp        0      0 0.0.0.0:us-cli          0.0.0.0:*               LISTEN      airflow    31997      2108/gunicorn: mast
+     tcp        0      0 0.0.0.0:ssh             0.0.0.0:*               LISTEN      root       22817      1088/sshd
+     tcp        0      0 localhost:32000         0.0.0.0:*               LISTEN      root       21310      1406/java
+     tcp        0      0 0.0.0.0:zabbix-agent    0.0.0.0:*               LISTEN      zabbix     12998      1087/zabbix_agentd
+     tcp6       0      0 [::]:zabbix-agent       [::]:*                  LISTEN      zabbix     12999      1087/zabbix_agentd
+     [08:27:49] airflow@ 002-netstat (master) $ sudo netstat -ltnep
+     Active Internet connections (only servers)
+     Proto Recv-Q Send-Q Local Address           Foreign Address         State       User       Inode      PID/Program name
+     tcp        0      0 0.0.0.0:3306            0.0.0.0:*               LISTEN      27         24236      1399/mysqld
+     tcp        0      0 0.0.0.0:8082            0.0.0.0:*               LISTEN      1003       31997      2108/gunicorn: mast
+     tcp        0      0 0.0.0.0:22              0.0.0.0:*               LISTEN      0          22817      1088/sshd
+     tcp        0      0 127.0.0.1:32000         0.0.0.0:*               LISTEN      0          21310      1406/java
+     tcp        0      0 0.0.0.0:10050           0.0.0.0:*               LISTEN      996        12998      1087/zabbix_agentd
+     tcp6       0      0 :::10050                :::*                    LISTEN      996        12999      1087/zabbix_agentd
+   #+end_src
